@@ -1,0 +1,29 @@
+@import 'bootstrap/dist/css/bootstrap.min.css';
+
+:root {
+  /*paleta de colores pasteles y neutros*/
+  --bg-app: #F7F7F8;
+  --primary-pastel: #9DB2BF; 
+  --secondary-pastel: #DDE6ED;
+  --accent-pastel: #EAE0DA;
+  
+  --text-main: #27374D;
+  --card-bg: #FFFFFF;
+}
+
+body {
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  font-family: system-ui, -apple-system, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* establecemos clases utilitarias para usarlas mas adelante*/
+.bg-pastel-primary { background-color: var(--primary-pastel) !important; color: #fff; }
+.text-pastel-dark { color: var(--text-main) !important; }
+.custom-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--secondary-pastel);
+  border-radius: 10px;
+}
