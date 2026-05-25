@@ -1,11 +1,11 @@
-//establecemos los enrutadores, en esta parte es donde vamos a ver las rutas para despues movernos enntre la pagina
-
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Navbar from './components/Navbar';
 import Inicio from './pages/Inicio';
 
 function App() {
   return (
     <Router>
+      <Navbar /> 
       <Routes>
         <Route path="/" element={<Inicio />} />
       </Routes>
