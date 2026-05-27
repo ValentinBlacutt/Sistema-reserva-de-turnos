@@ -4,7 +4,14 @@ const Navbar = () => {
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-pastel-primary shadow-sm py-3">
       <div className="container">
-        <Link className="navbar-brand fw-bold fs-4" to="/">Turnify</Link>
+        <Link className="navbar-brand d-flex align-items-center gap-2" to="/">
+          <img
+            src="/turnify-icon (2).png"
+            alt="Turnify"
+            height="48"
+          />
+          <span className="fw-bold fs-4">Turnify</span>
+        </Link>
         <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
           <span className="navbar-toggler-icon"></span>
         </button>

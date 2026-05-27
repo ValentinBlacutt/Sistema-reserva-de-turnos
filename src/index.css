@@ -1,29 +1,171 @@
 @import 'bootstrap/dist/css/bootstrap.min.css';
 
 :root {
-  /*paleta de colores pasteles y neutros*/
-  --bg-app: #F7F7F8;
-  --primary-pastel: #9DB2BF; 
+  --bg-app: #F0F4F8;
+  --primary-pastel: #7B9EAD;
   --secondary-pastel: #DDE6ED;
   --accent-pastel: #EAE0DA;
-  
   --text-main: #27374D;
   --card-bg: #FFFFFF;
+  --card-hover-border: #7B9EAD;
+  --gradient-start: #E8F4F8;
+  --gradient-end: #F5EEF8;
 }
 
 body {
-  background-color: var(--bg-app);
+  background: linear-gradient(135deg, var(--gradient-start) 0%, var(--bg-app) 50%, var(--gradient-end) 100%);
+  background-attachment: fixed;
   color: var(--text-main);
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; /* ← cambia acá */
   margin: 0;
   padding: 0;
 }
 
-/* establecemos clases utilitarias para usarlas mas adelante*/
-.bg-pastel-primary { background-color: var(--primary-pastel) !important; color: #fff; }
+/* ─── Navbar ─── */
+.bg-pastel-primary {
+  background: linear-gradient(90deg, #7B9EAD 0%, #9DB2BF 40%, #7B9EAD 100%) !important;
+  background-size: 200% 100% !important;
+  animation: navShimmer 6s ease-in-out infinite;
+  color: #fff;
+}
+
+@keyframes navShimmer {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 .text-pastel-dark { color: var(--text-main) !important; }
+
+/* ─── Título con gradiente ─── */
+.title-gradient {
+  background: linear-gradient(120deg, #27374D 0%, #526D82 60%, #9DB2BF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: inline-block;
+  animation: titleReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) both,
+             gradientShift 6s ease-in-out 0.8s infinite;
+  background-size: 200% auto;
+}
+
+@keyframes titleReveal {
+  from {
+    opacity: 0;
+    transform: translateY(20px) skewY(2deg);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) skewY(0deg);
+    filter: blur(0);
+  }
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% center; }
+  50%       { background-position: 100% center; }
+}
+
+/* ─── Cards ─── */
 .custom-card {
   background-color: var(--card-bg);
-  border: 1px solid var(--secondary-pastel);
-  border-radius: 10px;
+  border: 1.5px solid var(--secondary-pastel);
+  border-radius: 14px;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+  animation: fadeSlideUp 0.6s ease both;
+  position: relative;
+  overflow: hidden;
 }
+
+/* Shimmer que cruza la card al hacer hover */
+.custom-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(157, 178, 191, 0.18) 50%,
+    transparent 100%
+  );
+  transform: skewX(-15deg);
+  transition: none;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.custom-card:hover::before {
+  animation: cardShimmer 0.6s ease forwards;
+}
+
+@keyframes cardShimmer {
+  from { left: -75%; }
+  to   { left: 125%; }
+}
+
+.custom-card:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(123, 158, 173, 0.3) !important;
+  border-color: var(--card-hover-border);
+}
+
+.custom-card:nth-child(1) { animation-delay: 0.05s; }
+.custom-card:nth-child(2) { animation-delay: 0.15s; }
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(32px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Ícono dentro de la card ─── */
+.icon-wrapper {
+  background: var(--secondary-pastel);
+  border-radius: 12px;
+  padding: 12px;
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.custom-card:hover .icon-wrapper {
+  background: linear-gradient(135deg, #9DB2BF33, #EAE0DA88);
+  transform: rotate(-4deg) scale(1.08);
+}
+
+.custom-card:hover .icon-wrapper svg {
+  fill: #526D82 !important;
+  transition: fill 0.3s ease;
+}
+
+/* ─── Botón deshabilitado con badge pulsante ─── */
+.btn-dev {
+  background-color: #DDE6ED;
+  color: #526D82;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: not-allowed;
+  opacity: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  background: #E8A87C;
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1);   opacity: 1; }
+  50%       { transform: scale(1.4); opacity: 0.6; }
+}
+
