@@ -6,7 +6,7 @@ const Navbar = () => {
       <div className="container">
         <Link className="navbar-brand d-flex align-items-center gap-2" to="/">
           <img
-            src="/turnify-icon (2).png"
+            src="/turnify-icon.png"
             alt="Turnify"
             height="48"
           />

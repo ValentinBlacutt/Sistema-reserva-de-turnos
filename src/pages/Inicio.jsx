@@ -1,6 +1,6 @@
 const Inicio = () => {
   return (
-    <div className="container mt-5">
+    <div className="container mt-5 pb-5">
       <div className="row mb-5">
         <div className="col">
           <h1 className="fw-bold mb-1 title-gradient">
@@ -13,7 +13,7 @@ const Inicio = () => {
         </div>
       </div>
 
-      <div className="row g-4">
+      <div className="row g-4 mb-5">
 
         <div className="col-12 col-md-6">
           <div className="card custom-card h-100 p-4 shadow-sm">

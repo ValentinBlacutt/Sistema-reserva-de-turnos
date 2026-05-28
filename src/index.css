@@ -169,3 +169,31 @@ body {
   50%       { transform: scale(1.4); opacity: 0.6; }
 }
 
+/* ─── Footer ─── */
+.app-footer {
+  margin-top: 80px;
+  padding: 20px 0;
+  border-top: 1px solid var(--secondary-pastel);
+  background: transparent;
+  font-size: 0.82rem;
+}
+
+.footer-brand {
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.2px;
+}
+
+.footer-copy {
+  color: #9DB2BF;
+  font-weight: 400;
+}
+
+.footer-version {
+  background: var(--secondary-pastel);
+  color: #526D82;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+}
