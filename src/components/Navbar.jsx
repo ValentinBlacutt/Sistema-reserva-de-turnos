@@ -21,10 +21,10 @@ const Navbar = () => {
               <Link className="nav-link active fw-semibold" to="/">Inicio</Link>
             </li>
             <li className="nav-item">
-              <span className="nav-link opacity-50" style={{ cursor: 'not-allowed' }}>Profesionales</span>
+              <Link className="nav-link" to="/Profesionales">Profesionales</Link>
             </li>
             <li className="nav-item">
-              <span className="nav-link opacity-50" style={{ cursor: 'not-allowed' }}>Clientes</span>
+              <Link className="nav-link" to="/Clientes">Clientes</Link>
             </li>
           </ul>
         </div>

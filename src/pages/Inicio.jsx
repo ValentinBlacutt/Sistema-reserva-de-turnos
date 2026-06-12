@@ -1,4 +1,8 @@
+import { useNavigate } from 'react-router-dom';
+
 const Inicio = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="container mt-5 pb-5">
       <div className="row mb-5">
@@ -32,9 +36,11 @@ const Inicio = () => {
                   Gestione la plantilla de especialistas, asigne sus horarios de atención y configure las disciplinas disponibles.
                 </p>
               </div>
-              <button className="btn btn-dev w-100 py-2" disabled>
-                <span className="pulse-dot"></span>
-                Módulo en desarrollo
+              <button
+                className="btn btn-dev w-100 py-2"
+                onClick={() => navigate('/profesionales')}
+              >
+                Ver Profesionales
               </button>
             </div>
           </div>
@@ -56,9 +62,11 @@ const Inicio = () => {
                   Administre el registro centralizado de clientes, acceda a sus datos de contacto, asigne perfiles y consulte el historial de turnos.
                 </p>
               </div>
-              <button className="btn btn-dev w-100 py-2" disabled>
-                <span className="pulse-dot"></span>
-                Módulo en desarrollo
+              <button
+                className="btn btn-dev w-100 py-2"
+                onClick={() => navigate('/clientes')}
+              >
+                Ver Clientes
               </button>
             </div>
           </div>
