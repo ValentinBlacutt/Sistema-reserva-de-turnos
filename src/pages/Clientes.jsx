@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { getClientes } from '../services/api';
 
 const inicialesColor = (nombre) => {
@@ -14,6 +14,7 @@ const Clientes = () => {
   const [clientes, setClientes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [busqueda, setBusqueda] = useState('');
 
   useEffect(() => {
     getClientes()
@@ -21,6 +22,16 @@ const Clientes = () => {
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, []);
+
+  // Búsqueda por nombre, apellido o DNI
+  const filtrados = useMemo(() => {
+    const termino = busqueda.toLowerCase();
+    return clientes.filter((c) => {
+      const nombreCompleto = `${c.nombre ?? ''} ${c.apellido ?? ''}`.toLowerCase();
+      const dni = (c.dni ?? '').toString().toLowerCase();
+      return nombreCompleto.includes(termino) || dni.includes(termino);
+    });
+  }, [clientes, busqueda]);
 
   return (
     <div className="container mt-5 pb-5">
@@ -33,6 +44,34 @@ const Clientes = () => {
           </p>
         </div>
       </div>
+
+      {/* Buscador */}
+      {!loading && !error && clientes.length > 0 && (
+        <div className="row g-3 mb-4">
+          <div className="col-12 col-md-7">
+            <div className="position-relative">
+              <input
+                type="text"
+                className="form-control custom-input ps-5"
+                placeholder="Buscar por nombre, apellido o DNI..."
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+              />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                fill="#9DB2BF"
+                className="bi bi-search position-absolute"
+                viewBox="0 0 16 16"
+                style={{ top: '50%', left: 16, transform: 'translateY(-50%)' }}
+              >
+                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      )}
 
       {loading && (
         <div className="text-center py-5">
@@ -53,10 +92,16 @@ const Clientes = () => {
         </div>
       )}
 
-      {!loading && !error && clientes.length > 0 && (
+      {!loading && !error && clientes.length > 0 && filtrados.length === 0 && (
+        <div className="text-center py-5 text-muted">
+          <p className="fs-5">No se encontraron clientes con esos criterios.</p>
+        </div>
+      )}
+
+      {!loading && !error && filtrados.length > 0 && (
         <>
           <div className="row g-3">
-            {clientes.map((cliente) => (
+            {filtrados.map((cliente) => (
               <div key={cliente.id} className="col-12 col-md-6">
                 <div className="card custom-card shadow-sm p-3 h-100">
                   <div className="d-flex align-items-center gap-3">
@@ -101,7 +146,7 @@ const Clientes = () => {
           </div>
 
           <p className="text-muted small mt-3 px-1">
-            {clientes.length} cliente{clientes.length !== 1 ? 's' : ''} encontrado{clientes.length !== 1 ? 's' : ''}
+            {filtrados.length} de {clientes.length} cliente{clientes.length !== 1 ? 's' : ''}
           </p>
         </>
       )}

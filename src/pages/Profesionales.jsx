@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { getProfesionales } from '../services/api';
 
 const inicialesColor = (nombre) => {
@@ -14,6 +14,8 @@ const Profesionales = () => {
   const [profesionales, setProfesionales] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [busqueda, setBusqueda] = useState('');
+  const [especialidadFiltro, setEspecialidadFiltro] = useState('todas');
 
   useEffect(() => {
     getProfesionales()
@@ -21,6 +23,23 @@ const Profesionales = () => {
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, []);
+
+  // Lista única de especialidades para el select
+  const especialidades = useMemo(() => {
+    const set = new Set(profesionales.map((p) => p.especialidad).filter(Boolean));
+    return Array.from(set).sort();
+  }, [profesionales]);
+
+  // Aplicar búsqueda + filtro
+  const filtrados = useMemo(() => {
+    return profesionales.filter((p) => {
+      const nombreCompleto = `${p.nombre ?? ''} ${p.apellido ?? ''}`.toLowerCase();
+      const coincideNombre = nombreCompleto.includes(busqueda.toLowerCase());
+      const coincideEspecialidad =
+        especialidadFiltro === 'todas' || p.especialidad === especialidadFiltro;
+      return coincideNombre && coincideEspecialidad;
+    });
+  }, [profesionales, busqueda, especialidadFiltro]);
 
   return (
     <div className="container mt-5 pb-5">
@@ -33,6 +52,48 @@ const Profesionales = () => {
           </p>
         </div>
       </div>
+
+      {/* Buscador y filtro */}
+      {!loading && !error && profesionales.length > 0 && (
+        <div className="row g-3 mb-4">
+          <div className="col-12 col-md-7">
+            <div className="position-relative">
+              <input
+                type="text"
+                className="form-control custom-input ps-5"
+                placeholder="Buscar por nombre o apellido..."
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+              />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                fill="#9DB2BF"
+                className="bi bi-search position-absolute"
+                viewBox="0 0 16 16"
+                style={{ top: '50%', left: 16, transform: 'translateY(-50%)' }}
+              >
+                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+              </svg>
+            </div>
+          </div>
+          <div className="col-12 col-md-5">
+            <select
+              className="form-select custom-input"
+              value={especialidadFiltro}
+              onChange={(e) => setEspecialidadFiltro(e.target.value)}
+            >
+              <option value="todas">Todas las especialidades</option>
+              {especialidades.map((esp) => (
+                <option key={esp} value={esp}>
+                  {esp}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      )}
 
       {loading && (
         <div className="text-center py-5">
@@ -53,10 +114,16 @@ const Profesionales = () => {
         </div>
       )}
 
-      {!loading && !error && profesionales.length > 0 && (
+      {!loading && !error && profesionales.length > 0 && filtrados.length === 0 && (
+        <div className="text-center py-5 text-muted">
+          <p className="fs-5">No se encontraron profesionales con esos criterios.</p>
+        </div>
+      )}
+
+      {!loading && !error && filtrados.length > 0 && (
         <>
           <div className="row g-3">
-            {profesionales.map((prof) => (
+            {filtrados.map((prof) => (
               <div key={prof.id} className="col-12 col-md-6">
                 <div className="card custom-card shadow-sm p-3 h-100">
                   <div className="d-flex align-items-center gap-3">
@@ -109,7 +176,7 @@ const Profesionales = () => {
           </div>
 
           <p className="text-muted small mt-3 px-1">
-            {profesionales.length} profesional{profesionales.length !== 1 ? 'es' : ''} encontrado{profesionales.length !== 1 ? 's' : ''}
+            {filtrados.length} de {profesionales.length} profesional{profesionales.length !== 1 ? 'es' : ''}
           </p>
         </>
       )}
