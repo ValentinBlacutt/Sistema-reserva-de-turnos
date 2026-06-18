@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost/BackEndSistemaTurnos/BackEndSistemaTurnos/routes'; // Ajustá esta URL a tu backend
+const API_BASE = 'http://localhost/BackEndSistemaTurnos/BackEndSistemaTurnos/routes';
 
 const handleResponse = async (res) => {
   if (!res.ok) throw new Error('Error al conectar con el servidor');
@@ -20,3 +20,22 @@ export const getProfesionales = () =>
 
 export const getProfesionalById = (id) =>
   fetch(`${API_BASE}/api_profesionales.php?id=${id}`).then(handleResponse);
+
+export const createProfesional = (data) =>
+  fetch(`${API_BASE}/api_profesionales.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  }).then(handleResponse);
+
+export const updateProfesional = (id, data) =>
+  fetch(`${API_BASE}/api_profesionales.php?id=${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  }).then(handleResponse);
+
+export const deleteProfesional = (id) =>
+  fetch(`${API_BASE}/api_profesionales.php?id=${id}`, {
+    method: 'DELETE',
+  }).then(handleResponse);
