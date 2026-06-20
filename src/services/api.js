@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost/BackEndSistemaTurnos/BackEndSistemaTurnos/routes';
+const API_BASE = 'http://localhost/BackEndSistemaTurnos/routes';
 
 const handleResponse = async (res) => {
   if (!res.ok) throw new Error('Error al conectar con el servidor');

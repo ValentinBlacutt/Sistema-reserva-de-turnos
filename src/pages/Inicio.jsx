@@ -18,7 +18,6 @@ const Inicio = () => {
       </div>
 
       <div className="row g-4 mb-5">
-
         <div className="col-12 col-md-6">
           <div className="card custom-card h-100 p-4 shadow-sm">
             <div className="card-body d-flex flex-column justify-content-between">
@@ -36,10 +35,7 @@ const Inicio = () => {
                   Gestione la plantilla de especialistas, asigne sus horarios de atención y configure las disciplinas disponibles.
                 </p>
               </div>
-              <button
-                className="btn btn-dev w-100 py-2"
-                onClick={() => navigate('/profesionales')}
-              >
+              <button className="btn btn-dev w-100 py-2" onClick={() => navigate('/profesionales')}>
                 Ver Profesionales
               </button>
             </div>
@@ -62,16 +58,12 @@ const Inicio = () => {
                   Administre el registro centralizado de clientes, acceda a sus datos de contacto, asigne perfiles y consulte el historial de turnos.
                 </p>
               </div>
-              <button
-                className="btn btn-dev w-100 py-2"
-                onClick={() => navigate('/clientes')}
-              >
+              <button className="btn btn-dev w-100 py-2" onClick={() => navigate('/clientes')}>
                 Ver Clientes
               </button>
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );
