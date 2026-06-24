@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   getProfesionales,
   createProfesional,
   updateProfesional,
   deleteProfesional,
+  getEspecialidades,
 } from '../services/api';
 
 const FORM_VACIO = {
@@ -12,7 +14,7 @@ const FORM_VACIO = {
   dni: '',
   email: '',
   password: '',
-  especialidad: '',
+  especialidad_ids: [],
   descripcion: '',
 };
 
@@ -27,10 +29,12 @@ const iniciales = (nombre, apellido) =>
 
 const Profesionales = () => {
   const [profesionales, setProfesionales] = useState([]);
+  const [especialidades, setEspecialidades] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [busqueda, setBusqueda] = useState('');
   const [especialidadFiltro, setEspecialidadFiltro] = useState('todas');
+  const [refresh, setRefresh] = useState(0);
 
   // Modal
   const [modalAbierto, setModalAbierto] = useState(false);
@@ -41,22 +45,31 @@ const Profesionales = () => {
   const [errorModal, setErrorModal] = useState(null);
 
   // Confirm eliminar
-  const [confirmEliminar, setConfirmEliminar] = useState(null); // id a eliminar
-
-  const cargarProfesionales = () => {
-    setLoading(true);
-    getProfesionales()
-      .then(setProfesionales)
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  };
+  const [confirmEliminar, setConfirmEliminar] = useState(null);
 
   useEffect(() => {
-    cargarProfesionales();
-  }, []);
+    let activo = true;
+    Promise.all([getProfesionales(), getEspecialidades()])
+      .then(([profs, esps]) => {
+        if (activo) {
+          setProfesionales(profs);
+          setEspecialidades(esps);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        if (activo) {
+          setError(err.message);
+          setLoading(false);
+        }
+      });
+    return () => { activo = false; };
+  }, [refresh]);
 
-  const especialidades = useMemo(() => {
-    const set = new Set(profesionales.map((p) => p.especialidad).filter(Boolean));
+  const especialidadesUnicas = useMemo(() => {
+    const set = new Set(
+      profesionales.flatMap((p) => p.especialidades ?? []).filter(Boolean)
+    );
     return Array.from(set).sort();
   }, [profesionales]);
 
@@ -65,12 +78,12 @@ const Profesionales = () => {
       const nombreCompleto = `${p.nombre ?? ''} ${p.apellido ?? ''}`.toLowerCase();
       const coincideNombre = nombreCompleto.includes(busqueda.toLowerCase());
       const coincideEspecialidad =
-        especialidadFiltro === 'todas' || p.especialidad === especialidadFiltro;
+        especialidadFiltro === 'todas' ||
+        (p.especialidades ?? []).includes(especialidadFiltro);
       return coincideNombre && coincideEspecialidad;
     });
   }, [profesionales, busqueda, especialidadFiltro]);
 
-  // Abrir modal para nuevo
   const abrirModalNuevo = () => {
     setForm(FORM_VACIO);
     setModoEdicion(false);
@@ -79,7 +92,6 @@ const Profesionales = () => {
     setModalAbierto(true);
   };
 
-  // Abrir modal para editar
   const abrirModalEditar = (prof) => {
     setForm({
       nombre: prof.nombre ?? '',
@@ -87,7 +99,7 @@ const Profesionales = () => {
       dni: prof.dni ?? '',
       email: prof.email ?? '',
       password: '',
-      especialidad: prof.especialidad ?? '',
+      especialidad_ids: prof.especialidad_ids ?? [],
       descripcion: prof.descripcion ?? '',
     });
     setModoEdicion(true);
@@ -105,6 +117,15 @@ const Profesionales = () => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  const toggleEspecialidad = (id) => {
+    setForm((prev) => {
+      const ids = prev.especialidad_ids.includes(id)
+        ? prev.especialidad_ids.filter((i) => i !== id)
+        : [...prev.especialidad_ids, id];
+      return { ...prev, especialidad_ids: ids };
+    });
+  };
+
   const handleGuardar = async () => {
     setGuardando(true);
     setErrorModal(null);
@@ -115,7 +136,7 @@ const Profesionales = () => {
         await createProfesional(form);
       }
       cerrarModal();
-      cargarProfesionales();
+      setRefresh((r) => r + 1);
     } catch (err) {
       setErrorModal(err.message);
     } finally {
@@ -127,7 +148,7 @@ const Profesionales = () => {
     try {
       await deleteProfesional(id);
       setConfirmEliminar(null);
-      cargarProfesionales();
+      setRefresh((r) => r + 1);
     } catch (err) {
       setError(err.message);
     }
@@ -135,7 +156,6 @@ const Profesionales = () => {
 
   return (
     <div className="container mt-5 pb-5">
-      {/* Header */}
       <div className="row mb-4 align-items-center">
         <div className="col">
           <h1 className="fw-bold mb-1 title-gradient">Profesionales</h1>
@@ -144,14 +164,16 @@ const Profesionales = () => {
             Listado completo de profesionales registrados en el sistema.
           </p>
         </div>
-        <div className="col-auto">
+        <div className="col-auto d-flex gap-2">
+          <Link to="/especialidades" className="btn btn-outline-secondary px-3 py-2">
+            🏷️ Especialidades
+          </Link>
           <button className="btn btn-dev px-4 py-2" onClick={abrirModalNuevo}>
             + Nuevo profesional
           </button>
         </div>
       </div>
 
-      {/* Buscador y filtro */}
       {!loading && !error && profesionales.length > 0 && (
         <div className="row g-3 mb-4">
           <div className="col-12 col-md-7">
@@ -163,15 +185,9 @@ const Profesionales = () => {
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
               />
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                fill="#9DB2BF"
-                className="bi bi-search position-absolute"
-                viewBox="0 0 16 16"
-                style={{ top: '50%', left: 16, transform: 'translateY(-50%)' }}
-              >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#9DB2BF"
+                className="bi bi-search position-absolute" viewBox="0 0 16 16"
+                style={{ top: '50%', left: 16, transform: 'translateY(-50%)' }}>
                 <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
               </svg>
             </div>
@@ -183,7 +199,7 @@ const Profesionales = () => {
               onChange={(e) => setEspecialidadFiltro(e.target.value)}
             >
               <option value="todas">Todas las especialidades</option>
-              {especialidades.map((esp) => (
+              {especialidadesUnicas.map((esp) => (
                 <option key={esp} value={esp}>{esp}</option>
               ))}
             </select>
@@ -198,9 +214,7 @@ const Profesionales = () => {
         </div>
       )}
 
-      {error && (
-        <div className="alert alert-danger rounded-3">{error}</div>
-      )}
+      {error && <div className="alert alert-danger rounded-3">{error}</div>}
 
       {!loading && !error && profesionales.length === 0 && (
         <div className="text-center py-5 text-muted">
@@ -214,7 +228,6 @@ const Profesionales = () => {
         </div>
       )}
 
-      {/* Cards */}
       {!loading && !error && filtrados.length > 0 && (
         <>
           <div className="row g-3">
@@ -234,41 +247,32 @@ const Profesionales = () => {
                     </div>
 
                     <div className="flex-grow-1 min-width-0">
-                      <div className="d-flex align-items-center gap-2 flex-wrap">
-                        <span className="fw-semibold text-pastel-dark">
-                          {prof.nombre} {prof.apellido}
-                        </span>
-                        {prof.especialidad && (
-                          <span
-                            className="badge rounded-pill px-2 py-1"
-                            style={{ backgroundColor: '#e8f0f3', color: '#5C7F8A', fontSize: 12 }}
-                          >
-                            {prof.especialidad}
-                          </span>
-                        )}
+                      <div className="fw-semibold text-pastel-dark">
+                        {prof.nombre} {prof.apellido}
                       </div>
                       <div className="text-muted small mt-1">{prof.email}</div>
+                      {/* Badges de especialidades */}
+                      {prof.especialidades?.length > 0 && (
+                        <div className="d-flex flex-wrap gap-1 mt-2">
+                          {prof.especialidades.map((esp) => (
+                            <span
+                              key={esp}
+                              className="badge rounded-pill px-2 py-1"
+                              style={{ backgroundColor: '#e8f0f3', color: '#5C7F8A', fontSize: 11 }}
+                            >
+                              {esp}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                       {prof.descripcion && (
                         <div className="text-muted small mt-1 fst-italic">{prof.descripcion}</div>
                       )}
                     </div>
 
-                    {/* Acciones */}
                     <div className="d-flex flex-column gap-2 flex-shrink-0">
-                      <button
-                        className="btn btn-sm btn-outline-secondary"
-                        onClick={() => abrirModalEditar(prof)}
-                        title="Editar"
-                      >
-                        ✏️
-                      </button>
-                      <button
-                        className="btn btn-sm btn-outline-danger"
-                        onClick={() => setConfirmEliminar(prof.id)}
-                        title="Eliminar"
-                      >
-                        🗑️
-                      </button>
+                      <button className="btn btn-sm btn-outline-secondary" onClick={() => abrirModalEditar(prof)} title="Editar">✏️</button>
+                      <button className="btn btn-sm btn-outline-danger" onClick={() => setConfirmEliminar(prof.id)} title="Eliminar">🗑️</button>
                     </div>
                   </div>
                 </div>
@@ -297,9 +301,7 @@ const Profesionales = () => {
                 <button className="btn-close" onClick={cerrarModal} />
               </div>
               <div className="modal-body">
-                {errorModal && (
-                  <div className="alert alert-danger py-2 small">{errorModal}</div>
-                )}
+                {errorModal && <div className="alert alert-danger py-2 small">{errorModal}</div>}
                 <div className="row g-3">
                   <div className="col-6">
                     <label className="form-label small fw-semibold text-muted">Nombre</label>
@@ -324,8 +326,35 @@ const Profesionales = () => {
                     </div>
                   )}
                   <div className="col-12">
-                    <label className="form-label small fw-semibold text-muted">Especialidad</label>
-                    <input name="especialidad" className="form-control custom-input" value={form.especialidad} onChange={handleChange} />
+                    <label className="form-label small fw-semibold text-muted d-block mb-2">Especialidades</label>
+                    {especialidades.length === 0 ? (
+                      <p className="text-muted small fst-italic">
+                        No hay especialidades cargadas. Agregá desde el catálogo primero.
+                      </p>
+                    ) : (
+                      <div className="d-flex flex-wrap gap-2">
+                        {especialidades.map((esp) => {
+                          const seleccionada = form.especialidad_ids.includes(esp.id);
+                          return (
+                            <button
+                              key={esp.id}
+                              type="button"
+                              onClick={() => toggleEspecialidad(esp.id)}
+                              className="btn btn-sm rounded-pill"
+                              style={{
+                                backgroundColor: seleccionada ? '#5C7F8A' : '#e8f0f3',
+                                color: seleccionada ? '#fff' : '#5C7F8A',
+                                border: 'none',
+                                fontSize: 13,
+                                transition: 'all 0.15s',
+                              }}
+                            >
+                              {seleccionada ? '✓ ' : ''}{esp.nombre}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                   <div className="col-12">
                     <label className="form-label small fw-semibold text-muted">Descripción</label>
@@ -346,10 +375,7 @@ const Profesionales = () => {
 
       {/* Modal confirmar eliminar */}
       {confirmEliminar && (
-        <div
-          className="modal d-block"
-          style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
-        >
+        <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}>
           <div className="modal-dialog modal-dialog-centered modal-sm">
             <div className="modal-content custom-card border-0 text-center p-4">
               <div className="fs-1 mb-2">🗑️</div>

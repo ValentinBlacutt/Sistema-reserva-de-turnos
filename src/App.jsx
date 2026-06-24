@@ -4,6 +4,7 @@ import Footer from './components/Footer';
 import Inicio from './pages/Inicio';
 import Clientes from './pages/Clientes';
 import Profesionales from './pages/Profesionales';
+import Especialidades from './pages/Especialidades';
 import AdminLogin from './pages/AdminLogin';
 import UserLogin from './pages/UserLogin';
 import Registro from './pages/Registro';
@@ -42,6 +43,14 @@ function App() {
           element={
             <ProtectedRoute tipo="admin">
               <Profesionales />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/especialidades"
+          element={
+            <ProtectedRoute tipo="admin">
+              <Especialidades />
             </ProtectedRoute>
           }
         />

@@ -39,3 +39,26 @@ export const deleteProfesional = (id) =>
   fetch(`${API_BASE}/api_profesionales.php?id=${id}`, {
     method: 'DELETE',
   }).then(handleResponse);
+
+// --- Especialidades ---
+export const getEspecialidades = () =>
+  fetch(`${API_BASE}/api_especialidades.php`).then(handleResponse);
+
+export const createEspecialidad = (data) =>
+  fetch(`${API_BASE}/api_especialidades.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  }).then(handleResponse);
+
+export const updateEspecialidad = (id, data) =>
+  fetch(`${API_BASE}/api_especialidades.php?id=${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  }).then(handleResponse);
+
+export const deleteEspecialidad = (id) =>
+  fetch(`${API_BASE}/api_especialidades.php?id=${id}`, {
+    method: 'DELETE',
+  }).then(handleResponse);
